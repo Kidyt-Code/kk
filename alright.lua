@@ -1,4 +1,4 @@
--- FULL FLY & GOD MODE GUI SCRIPT
+-- FULL FLY & GOD MODE GUI SCRIPT (with BodyVelocity flying)
 repeat wait() until game:IsLoaded()
 
 local TweenService = game:GetService("TweenService")
@@ -101,28 +101,82 @@ Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
 -- Fly & GodMode Logic
 local character = player.Character or player.CharacterAdded:Wait()
 local flying = false
+local flyActive = false
 local flySpeed = 30
-local moveVec = Vector3.zero
-local flyConn, godConn
+local moveVec = Vector3.new(0, 0, 0)
+local flyConnection
+local godConn
+local godModeOn = false
+local bodyVelocity
 
 local function startFly()
-	local root = character:WaitForChild("HumanoidRootPart")
-	flyConn = RunService.RenderStepped:Connect(function(dt)
-		local cam = workspace.CurrentCamera
-		local move = cam.CFrame.LookVector * moveVec.Z + cam.CFrame.RightVector * moveVec.X + Vector3.new(0, moveVec.Y, 0)
-		root.Velocity = move.Magnitude > 0 and move.Unit * flySpeed or Vector3.zero
+	if flyConnection then flyConnection:Disconnect() end
+	local rootPart = character:WaitForChild("HumanoidRootPart")
+	rootPart.Anchored = false
+
+	if bodyVelocity then
+		bodyVelocity:Destroy()
+	end
+	bodyVelocity = Instance.new("BodyVelocity")
+	bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)  -- enough force to counter gravity
+	bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+	bodyVelocity.Parent = rootPart
+
+	flyActive = false
+
+	flyConnection = RunService.RenderStepped:Connect(function(dt)
+		if not flyActive then
+			if bodyVelocity then
+				bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+			end
+			return
+		end
+
+		local camCF = workspace.CurrentCamera.CFrame
+		local direction = Vector3.new(0, 0, 0)
+		if moveVec and moveVec.Magnitude > 0 then
+			direction += camCF.LookVector * moveVec.Z
+			direction += camCF.RightVector * moveVec.X
+			direction += Vector3.new(0, moveVec.Y or 0, 0)
+			direction = direction.Unit
+		end
+
+		if bodyVelocity then
+			if direction.Magnitude > 0 then
+				bodyVelocity.Velocity = direction * flySpeed
+			else
+				bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+			end
+		end
+	end)
+
+	task.delay(1, function()
+		flyActive = true
 	end)
 end
 
 local function stopFly()
-	if flyConn then flyConn:Disconnect() flyConn = nil end
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if root then root.Velocity = Vector3.zero end
+	flyActive = false
+	if flyConnection then
+		flyConnection:Disconnect()
+		flyConnection = nil
+	end
+	if bodyVelocity then
+		bodyVelocity:Destroy()
+		bodyVelocity = nil
+	end
+	local rootPart = character:FindFirstChild("HumanoidRootPart")
+	if rootPart then
+		rootPart.Velocity = Vector3.new(0, 0, 0)
+	end
 end
 
 flyButton.MouseButton1Click:Connect(function()
 	flying = not flying
 	if flying then
+		moveVec = Vector3.new(0, 0, 0)
+		stopFly()
+		task.wait(1)
 		startFly()
 		flyButton.Text = "Fly On"
 	else
@@ -183,8 +237,14 @@ end)
 
 player.CharacterAdded:Connect(function(char)
 	character = char
-	if flying then task.wait(1) startFly() end
-	if godModeOn then task.wait(1) godMode(true) end
+	if flying then
+		task.wait(1)
+		startFly()
+	end
+	if godModeOn then
+		task.wait(1)
+		godMode(true)
+	end
 end)
 
 -- GUI Controls
