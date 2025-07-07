@@ -1,44 +1,51 @@
--- FULL FLY & GOD MODE GUI SCRIPT (with BodyVelocity flying)
-repeat wait() until game:IsLoaded()
-
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- GUI Setup
-local screenGui = Instance.new("ScreenGui", playerGui)
-screenGui.Name = "FlyGUI"
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NoclipGUI"
 screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
-local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 300, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -140)
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 150)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(50, 50, 50)
+local frameStroke = Instance.new("UIStroke", mainFrame)
+frameStroke.Thickness = 2
+frameStroke.Color = Color3.fromRGB(50, 50, 50)
 
-local header = Instance.new("Frame", mainFrame)
+-- Header bar
+local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 35)
 header.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+header.Parent = mainFrame
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+header.ClipsDescendants = true
 
-local title = Instance.new("TextLabel", header)
+-- Title label
+local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -70, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Fly & Godmode"
+title.Text = "K's Noclip"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.FredokaOne
+title.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
 title.TextScaled = true
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
 
-local minimizeBtn = Instance.new("TextButton", header)
+-- Minimize Button
+local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
 minimizeBtn.Position = UDim2.new(1, -60, 0.5, -12)
 minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
@@ -46,9 +53,11 @@ minimizeBtn.Text = "-"
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextScaled = true
+minimizeBtn.Parent = header
 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
-local closeBtn = Instance.new("TextButton", header)
+-- Close button
+local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 25, 0, 25)
 closeBtn.Position = UDim2.new(1, -30, 0.5, -12)
 closeBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
@@ -56,225 +65,181 @@ closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextScaled = true
+closeBtn.Parent = header
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 
-local flyButton = Instance.new("TextButton", mainFrame)
-flyButton.Size = UDim2.new(0, 200, 0, 60)
-flyButton.Position = UDim2.new(0.5, -100, 0, 70)
-flyButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-flyButton.Text = "Fly Off"
-flyButton.TextScaled = true
-flyButton.Font = Enum.Font.GothamBold
-flyButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-Instance.new("UICorner", flyButton).CornerRadius = UDim.new(0, 8)
+-- Noclip toggle button
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 200, 0, 60)
+button.Position = UDim2.new(0.5, -100, 0, 70)
+button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+button.Text = "Noclip Off"
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.TextColor3 = Color3.fromRGB(0, 0, 0)
+button.BorderSizePixel = 0
+button.Parent = mainFrame
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+local buttonStroke = Instance.new("UIStroke", button)
+buttonStroke.Color = Color3.fromRGB(0, 50, 100)
+buttonStroke.Thickness = 3
+buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local godModeButton = Instance.new("TextButton", mainFrame)
-godModeButton.Size = UDim2.new(0, 200, 0, 60)
-godModeButton.Position = UDim2.new(0.5, -100, 0, 140)
-godModeButton.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-godModeButton.Text = "God Mode Off"
-godModeButton.TextScaled = true
-godModeButton.Font = Enum.Font.GothamBold
-godModeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-Instance.new("UICorner", godModeButton).CornerRadius = UDim.new(0, 8)
+local PhysicsService = game:GetService("PhysicsService")
 
-local speedLabel = Instance.new("TextLabel", mainFrame)
-speedLabel.Size = UDim2.new(0, 200, 0, 25)
-speedLabel.Position = UDim2.new(0.5, -100, 0, 210)
-speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "Fly Speed: 30"
-speedLabel.TextColor3 = Color3.new(1, 1, 1)
-speedLabel.Font = Enum.Font.GothamBold
-speedLabel.TextScaled = true
-
-local speedBox = Instance.new("TextBox", mainFrame)
-speedBox.Size = UDim2.new(0, 200, 0, 25)
-speedBox.Position = UDim2.new(0.5, -100, 0, 240)
-speedBox.PlaceholderText = "Set Speed"
-speedBox.Text = ""
-speedBox.Font = Enum.Font.Gotham
-speedBox.TextScaled = true
-speedBox.TextColor3 = Color3.new(0, 0, 0)
-speedBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
-
--- Fly & GodMode Logic
 local character = player.Character or player.CharacterAdded:Wait()
+local noclipConnection
+local noclipOn = false
+
+-- Variables for fly controls
+local speed = 50
+local moveVec = Vector3.zero
 local flying = false
-local flyActive = false
-local flySpeed = 30
-local moveVec = Vector3.new(0, 0, 0)
-local flyConnection
-local godConn
-local godModeOn = false
-local bodyVelocity
 
-local function startFly()
-	if flyConnection then flyConnection:Disconnect() end
-	local rootPart = character:WaitForChild("HumanoidRootPart")
-	rootPart.Anchored = false
-
-	if bodyVelocity then
-		bodyVelocity:Destroy()
-	end
-	bodyVelocity = Instance.new("BodyVelocity")
-	bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)  -- enough force to counter gravity
-	bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-	bodyVelocity.Parent = rootPart
-
-	flyActive = false
-
-	flyConnection = RunService.RenderStepped:Connect(function(dt)
-		if not flyActive then
-			if bodyVelocity then
-				bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-			end
-			return
-		end
-
-		local camCF = workspace.CurrentCamera.CFrame
-		local direction = Vector3.new(0, 0, 0)
-		if moveVec and moveVec.Magnitude > 0 then
-			direction += camCF.LookVector * moveVec.Z
-			direction += camCF.RightVector * moveVec.X
-			direction += Vector3.new(0, moveVec.Y or 0, 0)
-			direction = direction.Unit
-		end
-
-		if bodyVelocity then
-			if direction.Magnitude > 0 then
-				bodyVelocity.Velocity = direction * flySpeed
+local function setCollisions(state)
+	for _, part in pairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = state
+			part.Anchored = false
+			if noclipOn then
+				pcall(function()
+					part.CollisionGroup = "NoCollide"
+				end)
 			else
-				bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+				pcall(function()
+					part.CollisionGroup = "Default"
+				end)
+			end
+		end
+	end
+end
+
+local function startNoclip()
+	if noclipConnection then noclipConnection:Disconnect() end
+	flying = true
+	noclipConnection = RunService.Stepped:Connect(function(_, delta)
+		if not character or not character.Parent then return end
+		setCollisions(false)
+
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+
+		if humanoid then
+			humanoid.PlatformStand = true
+			if humanoid:GetState() ~= Enum.HumanoidStateType.Physics then
+				humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+			end
+		end
+
+		if rootPart then
+			-- Freeze velocity
+			rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+
+			-- Move character according to inputs
+			if flying then
+				local camera = workspace.CurrentCamera
+				local lookVector = camera.CFrame.LookVector
+				local rightVector = camera.CFrame.RightVector
+
+				local moveDirection = Vector3.new(0,0,0)
+				moveDirection += moveVec.Z * lookVector
+				moveDirection += moveVec.X * rightVector
+				moveDirection = moveDirection.Unit * speed
+				if moveVec.Magnitude == 0 then
+					moveDirection = Vector3.new(0,0,0)
+				end
+
+				rootPart.CFrame = rootPart.CFrame + moveDirection * delta
 			end
 		end
 	end)
-
-	task.delay(1, function()
-		flyActive = true
-	end)
 end
 
-local function stopFly()
-	flyActive = false
-	if flyConnection then
-		flyConnection:Disconnect()
-		flyConnection = nil
+local function stopNoclip()
+	if noclipConnection then
+		noclipConnection:Disconnect()
+		noclipConnection = nil
 	end
-	if bodyVelocity then
-		bodyVelocity:Destroy()
-		bodyVelocity = nil
-	end
-	local rootPart = character:FindFirstChild("HumanoidRootPart")
-	if rootPart then
-		rootPart.Velocity = Vector3.new(0, 0, 0)
+	flying = false
+	setCollisions(true)
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.PlatformStand = false
+		if humanoid:GetState() == Enum.HumanoidStateType.Physics then
+			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
 	end
 end
 
-flyButton.MouseButton1Click:Connect(function()
-	flying = not flying
-	if flying then
-		moveVec = Vector3.new(0, 0, 0)
-		stopFly()
-		task.wait(1)
-		startFly()
-		flyButton.Text = "Fly On"
+button.MouseButton1Click:Connect(function()
+	noclipOn = not noclipOn
+	if noclipOn then
+		startNoclip()
+		button.Text = "Noclip On"
+		button.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 	else
-		stopFly()
-		flyButton.Text = "Fly Off"
+		stopNoclip()
+		button.Text = "Noclip Off"
+		button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 	end
 end)
 
-speedBox.FocusLost:Connect(function()
-	local val = tonumber(speedBox.Text)
-	if val and val > 0 then
-		flySpeed = val
-		speedLabel.Text = "Fly Speed: " .. tostring(val)
-	end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe or not flying then return end
-	local map = {
-		W = Vector3.new(0, 0, 1), S = Vector3.new(0, 0, -1),
-		A = Vector3.new(-1, 0, 0), D = Vector3.new(1, 0, 0),
-		Space = Vector3.new(0, 1, 0), LeftControl = Vector3.new(0, -1, 0)
-	}
-	if map[input.KeyCode.Name] then moveVec += map[input.KeyCode.Name] end
-end)
-
-UserInputService.InputEnded:Connect(function(input, gpe)
-	if gpe or not flying then return end
-	local map = {
-		W = Vector3.new(0, 0, 1), S = Vector3.new(0, 0, -1),
-		A = Vector3.new(-1, 0, 0), D = Vector3.new(1, 0, 0),
-		Space = Vector3.new(0, 1, 0), LeftControl = Vector3.new(0, -1, 0)
-	}
-	if map[input.KeyCode.Name] then moveVec -= map[input.KeyCode.Name] end
-end)
-
-local function godMode(enable)
-	local h = character and character:FindFirstChildOfClass("Humanoid")
-	if not h then return end
-	if enable then
-		h.MaxHealth = math.huge
-		h.Health = h.MaxHealth
-		godConn = h.HealthChanged:Connect(function()
-			if h.Health < h.MaxHealth then h.Health = h.MaxHealth end
-		end)
-	else
-		if godConn then godConn:Disconnect() end
-		h.MaxHealth = 100
-		h.Health = math.min(h.Health, 100)
-	end
-end
-
-godModeButton.MouseButton1Click:Connect(function()
-	godModeOn = not godModeOn
-	godMode(godModeOn)
-	godModeButton.Text = godModeOn and "God Mode On" or "God Mode Off"
-end)
-
-player.CharacterAdded:Connect(function(char)
-	character = char
-	if flying then
-		task.wait(1)
-		startFly()
-	end
-	if godModeOn then
-		task.wait(1)
-		godMode(true)
-	end
-end)
-
--- GUI Controls
-minimizeBtn.MouseButton1Click:Connect(function()
-	local min = mainFrame.Size.Y.Offset > 100
-	local newSize = min and UDim2.new(0, 300, 0, 35) or UDim2.new(0, 300, 0, 280)
-	TweenService:Create(mainFrame, TweenInfo.new(0.25), {Size = newSize}):Play()
-	minimizeBtn.Text = min and "+" or "-"
-	flyButton.Visible = not min
-	godModeButton.Visible = not min
-	speedLabel.Visible = not min
-	speedBox.Visible = not min
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-	stopFly()
-	if godConn then godConn:Disconnect() end
-	screenGui:Destroy()
-end)
-
+-- Input handling for flying
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.F then
-		flying = not flying
-		if flying then
-			startFly()
-			flyButton.Text = "Fly On"
-		else
-			stopFly()
-			flyButton.Text = "Fly Off"
-		end
+	if not noclipOn then return end
+
+	if input.KeyCode == Enum.KeyCode.W then
+		moveVec = moveVec + Vector3.new(0, 0, 1)
+	elseif input.KeyCode == Enum.KeyCode.S then
+		moveVec = moveVec + Vector3.new(0, 0, -1)
+	elseif input.KeyCode == Enum.KeyCode.A then
+		moveVec = moveVec + Vector3.new(-1, 0, 0)
+	elseif input.KeyCode == Enum.KeyCode.D then
+		moveVec = moveVec + Vector3.new(1, 0, 0)
+	elseif input.KeyCode == Enum.KeyCode.Space then
+		moveVec = moveVec + Vector3.new(0, 1, 0)
+	elseif input.KeyCode == Enum.KeyCode.LeftControl then
+		moveVec = moveVec + Vector3.new(0, -1, 0)
 	end
 end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not noclipOn then return end
+
+	if input.KeyCode == Enum.KeyCode.W then
+		moveVec = moveVec - Vector3.new(0, 0, 1)
+	elseif input.KeyCode == Enum.KeyCode.S then
+		moveVec = moveVec - Vector3.new(0, 0, -1)
+	elseif input.KeyCode == Enum.KeyCode.A then
+		moveVec = moveVec - Vector3.new(-1, 0, 0)
+	elseif input.KeyCode == Enum.KeyCode.D then
+		moveVec = moveVec - Vector3.new(1, 0, 0)
+	elseif input.KeyCode == Enum.KeyCode.Space then
+		moveVec = moveVec - Vector3.new(0, 1, 0)
+	elseif input.KeyCode == Enum.KeyCode.LeftControl then
+		moveVec = moveVec - Vector3.new(0, -1, 0)
+	end
+end)
+
+-- Reconnect on respawn
+player.CharacterAdded:Connect(function(char)
+	character = char
+	if noclipOn then
+		startNoclip()
+	end
+end)
+
+local function fadeInButton()
+	local tween = TweenService:Create(button, TweenInfo.new(0.3), {
+		BackgroundTransparency = 0,
+		TextTransparency = 0,
+	})
+	tween:Play()
+end
+
+task.wait(0.1)
+fadeInButton()
